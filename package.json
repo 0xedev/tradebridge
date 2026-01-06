@@ -15,6 +15,7 @@
     "type-check": "tsc --noEmit",
     "migrate": "echo 'Database migrations not yet implemented'",
     "backtest": "tsx src/cli/backtest.ts",
+    "knowledge-demo": "tsx src/cli/knowledge-demo.ts",
     "clean": "rm -rf dist"
   },
   "keywords": [
