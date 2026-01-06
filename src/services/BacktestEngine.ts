@@ -248,7 +248,7 @@ export class BacktestEngine {
     const entryValue = this.position.quantity * this.position.entryPrice;
     const commission = positionValue * (this.config.commission / 100);
 
-    // Calculate P&L
+    // Calculate P&L (commission is paid on both entry and exit)
     let pnl: number;
     if (this.position.side === 'BUY') {
       pnl = positionValue - entryValue - commission * 2;
@@ -301,7 +301,8 @@ export class BacktestEngine {
         unrealizedPnL = entryValue - positionValue;
       }
 
-      this.equity = this.cash + positionValue + unrealizedPnL;
+      // Equity = cash + unrealized P&L (not cash + positionValue + unrealizedPnL)
+      this.equity = this.cash + entryValue + unrealizedPnL;
       this.position.unrealizedPnL = unrealizedPnL;
       this.position.currentPrice = currentPrice;
     } else {

@@ -82,7 +82,9 @@ export class FeatureEngineering {
     }
 
     const signal = this.calculateEMA(macd, signalPeriod);
-    const histogram = macd.slice(signal.length - macd.length).map((m, i) => m - signal[i]);
+    
+    // Histogram: align MACD and signal arrays properly
+    const histogram = macd.slice(macd.length - signal.length).map((m, i) => m - signal[i]);
 
     return { macd, signal, histogram };
   }
@@ -190,7 +192,16 @@ export class FeatureEngineering {
     const startIdx = 50; // Skip first 50 candles to ensure all indicators have values
 
     for (let i = startIdx; i < candles.length; i++) {
-      const idx = i - startIdx;
+      // Calculate indices for each indicator array
+      const sma5Idx = i - 4; // SMA5 starts from candle 4
+      const sma20Idx = i - 19; // SMA20 starts from candle 19
+      const sma50Idx = i - 49; // SMA50 starts from candle 49
+      const ema12Idx = i; // EMA starts from candle 0
+      const rsiIdx = i - 15; // RSI starts from candle 15 (period + 1)
+      const macdIdx = i; // MACD arrays start from beginning
+      const bbIdx = i - 19; // BB starts from candle 19
+      const atrIdx = i - 14; // ATR starts from candle 14
+      const stochIdx = i - 14; // Stochastic starts from candle 14
       
       // Price-based features
       const close = closes[i];
@@ -219,33 +230,35 @@ export class FeatureEngineering {
         priceChange5,
         priceChange10,
         volumeChange1,
-        bodySize / candleRange,
-        upperWick / candleRange,
-        lowerWick / candleRange,
+        bodySize / (candleRange || 1),
+        upperWick / (candleRange || 1),
+        lowerWick / (candleRange || 1),
         
         // Moving averages (normalized by current price)
-        sma5[idx] / close,
-        sma20[idx] / close,
-        sma50[idx] / close,
-        ema12[idx] / close,
+        (sma5[sma5Idx] || close) / close,
+        (sma20[sma20Idx] || close) / close,
+        (sma50[sma50Idx] || close) / close,
+        (ema12[ema12Idx] || close) / close,
         
         // RSI
-        rsi[idx] / 100,
+        (rsi[rsiIdx] || 50) / 100,
         
         // MACD (normalized)
-        macd.macd[idx] / close,
-        macd.signal[idx] / close,
-        macd.histogram[idx] / close,
+        (macd.macd[macdIdx] || 0) / close,
+        (macd.signal[macdIdx] || 0) / close,
+        (macd.histogram[macdIdx] || 0) / close,
         
         // Bollinger Bands (normalized)
-        (close - bb.lower[idx]) / (bb.upper[idx] - bb.lower[idx]),
+        bb.upper[bbIdx] && bb.lower[bbIdx]
+          ? (close - bb.lower[bbIdx]) / (bb.upper[bbIdx] - bb.lower[bbIdx] || 1)
+          : 0.5,
         
         // ATR (normalized)
-        atr[idx] / close,
+        (atr[atrIdx] || 0) / close,
         
         // Stochastic
-        stoch.k[idx] / 100,
-        stoch.d[idx] / 100,
+        (stoch.k[stochIdx] || 50) / 100,
+        (stoch.d[stochIdx] || 50) / 100,
       ];
 
       features.push(feature);

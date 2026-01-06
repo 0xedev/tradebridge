@@ -57,7 +57,7 @@ export class MLDirectionStrategy extends Strategy {
       // Ensemble of signals (simulating ML classification)
       let bullishSignals = 0;
       let bearishSignals = 0;
-      const totalSignals = 10;
+      const totalSignals = 10.0; // Use float for accurate division
 
       // 1. Trend signals (MA alignment)
       if (latestSMA5 > latestSMA20 && latestSMA20 > latestSMA50) {
