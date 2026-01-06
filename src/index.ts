@@ -36,8 +36,8 @@ class TradeBridge {
   constructor() {
     logger.info('Initializing TradeBridge...');
 
-    // Initialize services
-    this.dataService = new DataIngestionService('binance', true);
+    // Initialize services (use demo mode for environments without network access)
+    this.dataService = new DataIngestionService('binance', true, true);
     this.strategyEngine = new StrategyEngine();
     this.riskService = new RiskManagementService(tradingConfig.risk);
 

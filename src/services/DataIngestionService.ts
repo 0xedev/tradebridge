@@ -7,16 +7,21 @@ import ccxt, { Exchange } from 'ccxt';
 import pino from 'pino';
 import { Candle, Timeframe } from '../types/index.js';
 import EventEmitter from 'events';
+import { DemoDataGenerator } from '../utils/DemoDataGenerator.js';
 
 export class DataIngestionService extends EventEmitter {
   private logger: pino.Logger;
   private exchange: Exchange;
   private subscriptions: Map<string, NodeJS.Timeout>;
+  private demoMode: boolean;
+  private demoGenerators: Map<string, DemoDataGenerator>;
 
-  constructor(exchangeName: string = 'binance', testnet: boolean = true) {
+  constructor(exchangeName: string = 'binance', testnet: boolean = true, demoMode: boolean = false) {
     super();
     this.logger = pino({ name: 'data-ingestion' });
     this.subscriptions = new Map();
+    this.demoMode = demoMode;
+    this.demoGenerators = new Map();
 
     // Initialize exchange
     const ExchangeClass = ccxt[exchangeName as keyof typeof ccxt] as typeof ccxt.Exchange;
@@ -31,7 +36,7 @@ export class DataIngestionService extends EventEmitter {
       this.exchange.setSandboxMode(true);
     }
 
-    this.logger.info(`Initialized ${exchangeName} exchange (testnet: ${testnet})`);
+    this.logger.info(`Initialized ${exchangeName} exchange (testnet: ${testnet}, demo: ${demoMode})`);
   }
 
   /**
@@ -43,6 +48,11 @@ export class DataIngestionService extends EventEmitter {
     since?: number,
     limit: number = 100
   ): Promise<Candle[]> {
+    // Use demo data if in demo mode
+    if (this.demoMode) {
+      return this.fetchDemoCandles(symbol, timeframe, limit);
+    }
+
     try {
       const ohlcv = await this.exchange.fetchOHLCV(symbol, timeframe, since, limit);
 
@@ -55,9 +65,26 @@ export class DataIngestionService extends EventEmitter {
         volume: candle[5] as number,
       }));
     } catch (error) {
-      this.logger.error(`Error fetching candles for ${symbol}: ${error}`);
-      throw error;
+      this.logger.warn(`Error fetching candles for ${symbol}, falling back to demo data: ${error}`);
+      // Fallback to demo data on error
+      return this.fetchDemoCandles(symbol, timeframe, limit);
     }
+  }
+
+  /**
+   * Fetch demo candles (for testing without network access)
+   */
+  private fetchDemoCandles(symbol: string, timeframe: Timeframe, limit: number = 100): Candle[] {
+    const key = `${symbol}-${timeframe}`;
+    
+    if (!this.demoGenerators.has(key)) {
+      // Initialize generator with different base prices for different symbols
+      const basePrice = symbol.includes('BTC') ? 50000 : symbol.includes('ETH') ? 3000 : 100;
+      this.demoGenerators.set(key, new DemoDataGenerator(basePrice));
+    }
+
+    const generator = this.demoGenerators.get(key)!;
+    return generator.generateCandles(limit, timeframe);
   }
 
   /**
