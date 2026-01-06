@@ -11,12 +11,15 @@ export class RSIOversoldStrategy extends Strategy {
   private period: number;
   private oversoldLevel: number;
   private overboughtLevel: number;
+  private neutralConviction: number; // Conviction when RSI is in neutral zone (30-70)
 
   constructor(config: any) {
     super(config);
     this.period = config.parameters?.period || 14;
     this.oversoldLevel = config.parameters?.oversoldLevel || 30;
     this.overboughtLevel = config.parameters?.overboughtLevel || 70;
+    // Lower conviction (30%) when RSI is in neutral zone
+    this.neutralConviction = config.parameters?.neutralConviction || 0.3;
   }
 
   async analyze(data: MarketData): Promise<Signal> {
@@ -48,8 +51,8 @@ export class RSIOversoldStrategy extends Strategy {
       conviction = (currentRSI - this.overboughtLevel) / (100 - this.overboughtLevel);
       this.logger.info(`RSI overbought (${currentRSI.toFixed(2)}) on ${data.symbol}`);
     } else {
-      // Neutral zone
-      conviction = 0.3;
+      // Neutral zone - lower conviction, direction based on which side of 50
+      conviction = this.neutralConviction;
       if (currentRSI > 50) {
         direction = 'BUY';
       } else {

@@ -87,6 +87,7 @@ export interface RiskConfig {
   maxConsecutiveLosses: number;
   stopLossType: 'FIXED' | 'ATR' | 'TRAILING';
   stopLossValue: number;
+  fallbackStopLossPercent?: number; // Default: 2%
 }
 
 export interface TradingConfig {
@@ -96,4 +97,5 @@ export interface TradingConfig {
   symbols: string[];
   timeframes: Timeframe[];
   risk: RiskConfig;
+  signalThreshold?: number; // Minimum conviction to act on signal (default: 0.5)
 }

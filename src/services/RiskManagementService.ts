@@ -111,11 +111,12 @@ export class RiskManagementService {
       case 'ATR':
         // ATR-based stop loss
         if (!atr) {
-          // Fallback to 2% if ATR not available
+          // Fallback to configured percentage if ATR not available
+          const fallbackPercent = (this.config.fallbackStopLossPercent || 2) / 100;
           stopLoss =
             side === 'BUY'
-              ? entryPrice * 0.98
-              : entryPrice * 1.02;
+              ? entryPrice * (1 - fallbackPercent)
+              : entryPrice * (1 + fallbackPercent);
         } else {
           stopLoss =
             side === 'BUY'

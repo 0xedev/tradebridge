@@ -61,7 +61,7 @@ export class StrategyEngine {
   /**
    * Aggregate signals from multiple strategies using weighted conviction scoring
    */
-  aggregateSignals(signals: Map<string, Signal>): Signal {
+  aggregateSignals(signals: Map<string, Signal>, threshold: number = 0.5): Signal {
     let totalBuyConviction = 0;
     let totalSellConviction = 0;
     let totalWeight = 0;
@@ -92,8 +92,8 @@ export class StrategyEngine {
     const avgBuyConviction = totalBuyConviction / totalWeight;
     const avgSellConviction = totalSellConviction / totalWeight;
 
-    // Determine final signal
-    if (avgBuyConviction > avgSellConviction && avgBuyConviction > 0.5) {
+    // Determine final signal using configurable threshold
+    if (avgBuyConviction > avgSellConviction && avgBuyConviction > threshold) {
       return {
         direction: 'BUY',
         conviction: avgBuyConviction,
@@ -103,7 +103,7 @@ export class StrategyEngine {
           strategiesCount: signals.size,
         },
       };
-    } else if (avgSellConviction > avgBuyConviction && avgSellConviction > 0.5) {
+    } else if (avgSellConviction > avgBuyConviction && avgSellConviction > threshold) {
       return {
         direction: 'SELL',
         conviction: avgSellConviction,

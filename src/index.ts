@@ -96,7 +96,10 @@ class TradeBridge {
       }
 
       // Aggregate signals
-      const aggregatedSignal = this.strategyEngine.aggregateSignals(signals);
+      const aggregatedSignal = this.strategyEngine.aggregateSignals(
+        signals,
+        tradingConfig.signalThreshold
+      );
 
       // Log signals
       logger.info(`\n=== ${data.symbol} @ ${data.timeframe} ===`);

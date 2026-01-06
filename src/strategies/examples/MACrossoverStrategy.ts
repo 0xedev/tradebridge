@@ -10,11 +10,14 @@ import { MarketData, Signal } from '../../types/index.js';
 export class MACrossoverStrategy extends Strategy {
   private fastPeriod: number;
   private slowPeriod: number;
+  private convictionNormalizer: number; // Used to normalize SMA distance to 0-1 scale
 
   constructor(config: any) {
     super(config);
     this.fastPeriod = config.parameters?.fastPeriod || 20;
     this.slowPeriod = config.parameters?.slowPeriod || 50;
+    // Default 0.02 means 2% distance between SMAs = 100% conviction
+    this.convictionNormalizer = config.parameters?.convictionNormalizer || 0.02;
   }
 
   async analyze(data: MarketData): Promise<Signal> {
@@ -46,7 +49,7 @@ export class MACrossoverStrategy extends Strategy {
     // Calculate conviction based on distance between SMAs
     const distance = Math.abs(currentFast - currentSlow);
     const avgPrice = (currentFast + currentSlow) / 2;
-    const conviction = Math.min(distance / avgPrice / 0.02, 1); // Normalize to 0-1
+    const conviction = Math.min(distance / avgPrice / this.convictionNormalizer, 1); // Normalize to 0-1
 
     if (bullishCrossover) {
       this.logger.info(`Bullish crossover detected on ${data.symbol}`);

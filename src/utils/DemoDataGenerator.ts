@@ -41,16 +41,20 @@ export class DemoDataGenerator {
     for (let i = count - 1; i >= 0; i--) {
       const timestamp = now - i * interval;
 
-      // Random walk with trend
-      const change = (Math.random() - 0.5) * this.volatility + this.trend;
-      currentPrice = currentPrice * (1 + change);
-
-      // Generate OHLC
+      // Use previous close as open price
       const open = currentPrice;
-      const volatilityRange = currentPrice * this.volatility * 0.5;
-      const high = currentPrice + Math.random() * volatilityRange;
-      const low = currentPrice - Math.random() * volatilityRange;
-      const close = low + Math.random() * (high - low);
+
+      // Random walk with trend for close price
+      const change = (Math.random() - 0.5) * this.volatility + this.trend;
+      const close = open * (1 + change);
+
+      // Generate high and low that respect OHLC constraints
+      const volatilityRange = open * this.volatility * 0.5;
+      const maxPrice = Math.max(open, close);
+      const minPrice = Math.min(open, close);
+      
+      const high = maxPrice + Math.random() * volatilityRange;
+      const low = minPrice - Math.random() * volatilityRange;
       const volume = 1000000 + Math.random() * 5000000;
 
       candles.push({
@@ -62,6 +66,7 @@ export class DemoDataGenerator {
         volume,
       });
 
+      // Update current price for next iteration
       currentPrice = close;
     }
 

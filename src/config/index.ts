@@ -14,6 +14,7 @@ export const tradingConfig: TradingConfig = {
   enabledStrategies: ['ma-crossover', 'rsi-oversold'],
   symbols: ['BTC/USDT', 'ETH/USDT'],
   timeframes: ['1h', '4h'] as Timeframe[],
+  signalThreshold: 0.5, // Minimum conviction to execute trade
   risk: {
     maxDailyLossPercent: Number(process.env.MAX_DAILY_LOSS_PERCENT) || 5,
     maxDrawdownPercent: Number(process.env.MAX_DRAWDOWN_PERCENT) || 20,
@@ -22,6 +23,7 @@ export const tradingConfig: TradingConfig = {
     maxConsecutiveLosses: 3,
     stopLossType: 'ATR',
     stopLossValue: 2,
+    fallbackStopLossPercent: 2, // 2% fallback if ATR not available
   },
 };
 
