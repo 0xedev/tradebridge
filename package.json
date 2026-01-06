@@ -1,0 +1,56 @@
+{
+  "name": "tradebridge",
+  "version": "0.1.0",
+  "description": "Enterprise-Grade AI-Powered Multi-Asset Trading Platform",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "migrate": "echo 'Database migrations not yet implemented'",
+    "backtest": "tsx src/cli/backtest.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "trading",
+    "algorithmic-trading",
+    "crypto",
+    "forex",
+    "stocks",
+    "ai",
+    "machine-learning"
+  ],
+  "author": "TradeBridge Team",
+  "license": "MIT",
+  "dependencies": {
+    "ccxt": "^4.2.25",
+    "fastify": "^4.25.2",
+    "zod": "^3.22.4",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "dotenv": "^16.3.1",
+    "ioredis": "^5.3.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.8",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

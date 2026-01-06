@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Redis - Caching and pub/sub
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # PostgreSQL - Relational database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tradebridge
+      POSTGRES_USER: tradebridge
+      POSTGRES_PASSWORD: tradebridge_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # MongoDB - Document store
+  mongodb:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_DATABASE: tradebridge
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # InfluxDB - Time-series database
+  influxdb:
+    image: influxdb:2.7-alpine
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: tradebridge_influx_password
+      DOCKER_INFLUXDB_INIT_ORG: tradebridge
+      DOCKER_INFLUXDB_INIT_BUCKET: market_data
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: tradebridge_dev_token
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+
+volumes:
+  redis_data:
+  postgres_data:
+  mongodb_data:
+  influxdb_data:
